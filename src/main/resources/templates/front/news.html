@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/resource/common/layui/css/layui.css" media="all"/>
+    <link rel="stylesheet" href="/resource/css/global.css">
+    <link rel="stylesheet" href="/resource/css/news.css">
+</head>
+<body>
+
+
+<!--顶部引用-->
+<div th:replace="front/public:: heads"></div>
+<div class="layui-container news-list news-index">
+    <div class="layui-row layui-col-space20 contentBot">
+        <div class="layui-col-md8 index-list">
+            <div class="layui-tab layui-tab-brief">
+                <ul class="layui-tab-title">
+                    <li class=""><a href="/front/news.do">全部</a></li>
+                    <li th:each="category:${newCategoryList}"><a
+                            th:href="${'/front/news.do?categoryId='+category.id}"><span
+                            th:text="${category.name}">互联网</span></a></li>
+                </ul>
+                <div class="layui-tab-content">
+                    <div class="layui-tab-item layui-show">
+                        <ul class="newsList">
+                            <li th:each="news:${newsPage.records}">
+                                <a class="img" href="javascript:;"><img th:src="${news.img}"
+                                                                        style="height: 153px;"></a>
+                                <div class="txt">
+                                    <a th:href="${'/front/newDetail.do?id='+news.id}" th:text="${news.name}"></a>
+                                    <div class="label"><span class="cyan" th:text="${news.categoryName}">科技</span><span
+                                            th:text="${news.userName}">爱科学 </span><b
+                                            th:text="${#strings.substring(news.time,0,19)}">2018-06-07</b>
+                                    </div>
+                                    <p class="cont" th:text="${news.digest}"></p>
+                                </div>
+                            </li>
+                            <div id="test1"></div>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--底部引用-->
+<div th:replace="front/public :: footer"></div>
+
+
+<script type="text/javascript" src="/resource/common/layui/layui.js"></script>
+<script type="text/javascript" src="/resource/js/front/index.js"></script>
+<script th:inline="javascript">
+    layui.use(['table', 'layer', 'form', 'laypage'], function () {
+        var table = layui.table,
+            $ = layui.$,
+            layer = layui.layer,
+            laypage = layui.laypage,
+            form = layui.form;
+        //执行一个laypage实例
+        //后台数据拿到的数据总数
+        var count = [[${newsPage.total}]]
+        //后台数据拿到的页数
+        var page = [[${page}]]
+        //后台数据拿到的categoryId[分类id]
+        var categoryId = [[${categoryId}]]
+        //首次加载默认页数
+        var curr = 1;
+        //首次默认分类id为空
+        if (page != '1') {
+            //如果页数不是1,则将curr改为page
+            curr = page
+        }
+        laypage.render({
+            elem: 'test1' //注意，这里的 test1 是 ID，不用加 # 号
+            , count: count //数据总数，从服务端得到
+            , limit: "5"//默认条数,必须和后台保持一直
+            , curr: curr
+            , jump: function (obj, first) {
+                //首次不执行
+                if (!first) {
+                    //obj包含了当前分页的所有参数，比如：
+                    console.log(obj.curr); //得到当前页，以便向服务端请求对应页的数据。
+                    console.log(obj.limit); //得到每页显示的条数
+                    location.href = '/front/news.do?page=' + obj.curr + '&limit=' + obj.limit + '&categoryId=' + categoryId
+                }
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title></title>
+    <link rel="stylesheet" href="/resource/common/layui/css/layui.css">
+    <link rel="stylesheet" href="/resource/css/global.css">
+    <link rel="stylesheet" href="/resource/css/main.css">
+    <!--加载meta IE兼容文件-->
+    <!--[if lt IE 9]>
+    <![endif]-->
+</head>
+<style>
+    .whisper-user img {
+        width: 40px;
+        height: 40px;
+        border: 1px solid #dabb92;
+        border-radius: 4px
+    }
+
+    .whisper-user span {
+        color: #dabb92;
+    }
+
+    .list-cont .cont img {
+        width: 40px;
+        height: 40px;
+        border: 1px solid #dabb92;
+        border-radius: 4px
+    }
+
+
+</style>
+<body>
+<div th:replace="front/public :: heads"></div>
+<div class="layui-hide-xs">
+    <div class="fly-panel fly-column">
+        <div class="layui-container">
+            <ul class="layui-clear">
+                <li class="layui-hide-xs"><a href="/front/index.do">首页</a></li>
+                <li class="layui-hide-xs">> 搜索结果</li>
+            </ul>
+            <div class="fly-column-right layui-hide-xs">
+                <li id="date"></li>
+            </div>
+        </div>
+    </div>
+</div>
+<div style="padding: 20px; background-color: #F2F2F2;">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md4" th:each="addressBook:${addressBookList}">
+            <div class="layui-card">
+                <div class="layui-card-body layui-row">
+                    <a th:href="${'/front/other.do?userId='+addressBook.id}">
+                        <div class="layui-col-md4" style="text-align: center">
+                            <img th:src="${addressBook.imgUrl}"
+                                 style="max-width: 80%;border-radius: 50%;margin-top: 5px">
+                        </div>
+                        <div class="layui-col-md6" style="line-height: 30px">
+                            <p th:text="${addressBook.userName}" style="font-weight: bold;font-size: 17px"></p>
+                            <p><i class="layui-icon">&#xe715</i>&nbsp;<span th:text="${addressBook.address}"></span></p>
+                            <p th:text="${'姓名: '+addressBook.realName}" style="color:#666666;"></p>
+                            <p th:text="${'Email: '+addressBook.email}" style="color:#666666;"></p>
+                            <p th:text="${'Tel: '+addressBook.iphone}" style="color:#666666;"></p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="front/public :: footer"></div>
+<script type="text/html" id="laytplCont">
+    <div class="cont">
+        <div class="img">
+            <img src="{{d.avatar}}" alt="">
+        </div>
+        <div class="text">
+            <p class="tit"><span class="name">{{d.name}}</span><span class="data">2018/06/06</span></p>
+            <p class="ct">{{d.cont}}</p>
+        </div>
+    </div>
+</script>
+<script type="text/javascript" src="/resource/common/layui/layui.js"></script>
+<script src="/resource/js/jquery-1.7.2.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+    layui.config({
+        base: '/resource/js/'
+    }).use(['element', 'laypage', 'form', 'layedit', 'menu'], function () {
+        element = layui.element, laypage = layui.laypage, $ = layui.$, layedit = layui.layedit, form = layui.form, menu = layui.menu;
+        laypage.render({
+            elem: 'demo'
+            , count: 70 //数据总数，从服务端得到
+        });
+        $('.search-btn').on("click", function () {
+            var searchParam = $('#searchParam').val();
+            //修改用户
+            layer.open({
+                type: 2,
+                title: "添加联系人",
+                shadeClose: false, //点击遮罩关闭层
+                area: ['700px', '478px'],
+                content: "/user/searchdo?searchParam=" + searchParam
+            });
+        })
+        $('.delAddress').on("click", function () {
+            var id = $(this).attr("id");
+            layer.confirm('是否删除该联系人?', function (index) {
+                $.ajax({
+                    url: "/addressBook/addressBook.do",
+                    type: "post",
+                    data: {_method: "DELETE", "id": id},
+                    dataType: "json",
+                    success: function (result) {
+                        if (!result.status) {
+                            layer.msg(result.msg, {time: 2000});
+                            return false;
+                        }
+                        layer.msg("删除成功!", {time: 1000});
+                        location.reload()
+                    }
+                });
+                layer.close(index);
+            })
+        })
+        layedit.set({
+            //暴露layupload参数设置接口 --详细查看layupload参数说明
+            uploadImage: {
+                url: '/layeditUpload.do',
+                accept: 'image',
+                acceptMime: 'image/*',
+                exts: 'jpg|png|gif|bmp|jpeg',
+                size: '10240'
+            }
+            , uploadVideo: {
+                url: '/layeditUpload.do',
+                accept: 'video',
+                acceptMime: 'video/*',
+                exts: 'mp4|flv|avi|rm|rmvb',
+                size: '20480'
+            }
+            //右键删除图片/视频时的回调参数，post到后台删除服务器文件等操作，
+            //传递参数：
+            //图片： imgpath --图片路径
+            //视频： filepath --视频路径 imgpath --封面路径
+            , calldel: {
+                url: '/Attachment/DeleteFile'
+            }
+            //开发者模式 --默认为false
+            , devmode: true
+            //插入代码设置
+            , codeConfig: {
+                hide: true,  //是否显示编码语言选择框
+                default: 'javascript' //hide为true时的默认语言格式
+            }
+            , tool: [
+                'face', 'link', 'image_alt',]
+
+        });
+        var index = layedit.build('leaveWordContent', {
+            height: 200 //设置编辑器高度
+        });
+        //提交留言功能
+        $('#leaveWord-submit-btn').on('click', function () {
+            var content = layedit.getContent(index);
+            $.ajax({
+                url: '/leaveWord/leaveWord.do',
+                type: 'post',
+                data: {"content": content},
+                dataType: 'json',
+                async: false,
+                success: function (result) {
+                    if (result.status) {
+                        layer.alert("留言成功!", {
+                            time: 2000,
+                            end: function () {
+                                location.reload()
+                            }
+                        })
+                    } else {
+                        layer.msg("留言失败!")
+                    }
+                }
+            });
+        })
+        //回复留言功能
+        $('.definite').on('click', function () {
+            var id = $(this).attr("id");
+            var textarea = $(this).parents('.layui-form-item').siblings('.layui-form-text').children('.layui-input-block').children('textarea');
+            var content = $(textarea).val();
+            $.ajax({
+                url: '/leaveWord/answering.do',
+                type: 'post',
+                data: {"content": content, "leaveId": id},
+                dataType: 'json',
+                async: false,
+                success: function (result) {
+                    if (result.status) {
+                        layer.alert("回复成功!", {
+                            time: 2000,
+                            end: function () {
+                                location.reload()
+                            }
+                        })
+                    } else {
+                        layer.msg("回复失败!")
+                    }
+                }
+            });
+        });
+        //删除留言功能
+        $('.delete').on('click', function () {
+            //留言id
+            var id = $(this).attr("id");
+            console.log(id);
+            $.ajax({
+                url: '/leaveWord/leaveWord.do',
+                type: 'post',
+                data: {_method: "DELETE", "id": id},
+                dataType: 'json',
+                async: false,
+                success: function (result) {
+                    if (result.status) {
+                        layer.alert("删除成功!", {
+                            time: 2000,
+                            end: function () {
+                                location.reload()
+                            }
+                        })
+                    } else {
+                        layer.msg("删除失败!")
+                    }
+                }
+            });
+        })
+        //删除留言回复功能
+        $('.deleteAnswering').on('click', function () {
+            //留言回复id
+            var id = $(this).attr("id");
+            console.log(id);
+            $.ajax({
+                url: '/leaveWord/answering.do',
+                type: 'post',
+                data: {_method: "DELETE", "id": id},
+                dataType: 'json',
+                async: false,
+                success: function (result) {
+                    if (result.status) {
+                        layer.alert("删除成功!", {
+                            time: 2000,
+                            end: function () {
+                                location.reload()
+                            }
+                        })
+                    } else {
+                        layer.msg("删除失败!")
+                    }
+                }
+            });
+        })
+        //点赞
+        $('.like').on('click', function () {
+            //留言id
+            var id = $(this).attr("id");
+            console.log(id);
+            $.ajax({
+                url: '/leaveWord/getALike.do',
+                type: 'post',
+                data: {"leaveId": id},
+                dataType: 'json',
+                async: false,
+                success: function (result) {
+                    if (result.status) {
+                        layer.alert(result.msg, {
+                            time: 2000,
+                            end: function () {
+                                location.reload()
+                            }
+                        })
+                    } else {
+                        layer.msg(result.msg)
+                    }
+                }
+            });
+        })
+        menu.init();
+        menu.off();
+        menu.submit()
+    })
+</script>
+<script type="text/javascript">
+    window.onload = function () {
+        setInterval(function () {
+            var date = new Date();
+            var sign1 = "-";
+            var sign2 = ":";
+            var year = date.getFullYear() // 年
+            var month = date.getMonth() + 1; // 月
+            var day = date.getDate(); // 日
+            var hour = date.getHours(); // 时
+            var minutes = date.getMinutes(); // 分
+            var seconds = date.getSeconds() //秒
+            var weekArr = ['星期天', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+            var week = weekArr[date.getDay()];
+            // 给一位数数据前面加 “0”
+            if (month >= 1 && month <= 9) {
+                month = "0" + month;
+            }
+            if (day >= 0 && day <= 9) {
+                day = "0" + day;
+            }
+            if (hour >= 0 && hour <= 9) {
+                hour = "0" + hour;
+            }
+            if (minutes >= 0 && minutes <= 9) {
+                minutes = "0" + minutes;
+            }
+            if (seconds >= 0 && seconds <= 9) {
+                seconds = "0" + seconds;
+            }
+            //获取id=Date的标签，加入内容。
+            var d = document.getElementById('date');
+            d.innerHTML = year + sign1 + month + sign1 + day + " " + hour + sign2 + minutes + sign2 + seconds + " " + week;
+        }, 1000)
+    };
+    /* d.innerHTML='当前时间:'+ year + sign1 + month + sign1 + day + " " + hour + sign2 + minutes + sign2 + seconds;},1000)};不带星期的*/
+</script>
+</body>
+</html>

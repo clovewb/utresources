@@ -1,0 +1,269 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title></title>
+    <link href="/resource/css/table.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="/resource/common/layui/css/layui.css" media="all"/>
+    <!--<link rel="stylesheet" href="/resource/css/global.css">-->
+</head>
+<style>
+    .layui-upload-img {
+        width: 200px;
+        height: 200px;
+    }
+
+    .submitBtn {
+        margin-top: 40px;
+        margin-left: 49%;
+    }
+
+    .text {
+        color: #FFFFFF;
+        font-size: 30px;
+        margin-top: 40px;
+    }
+</style>
+<body style="background-color: #e6ecf5;min-width: 1100px">
+
+<div class="book_con01">
+    <div style="width: 94%;margin-left: 1.5%;">
+        <div class="layui-carousel" id="test1" >
+            <div carousel-item>
+                <div style="align-content: center">
+                    <img src="/resource/img/a.png" style="width: 100%;height: 100%">
+
+                </div>
+                <div style="align-content: center">
+                <img src="/resource/img/b.jpg" style="width: 100%;height: 100%">
+                </div>
+                <div style="align-content: center">
+                    <img src="/resource/img/c.png" style="width: 100%;height: 100%">
+                </div>
+            </div>
+        </div>
+    </div>
+    <br/>
+    <div class="layui-row" style="width: 100%;">
+        <div class="layui-col-md2" style="margin-left: 1.5%;width: 22%;">
+            <div class="layui-col-md6" style="background-color: #60A7D0;text-align: center;height: 125px;">
+                <div style="margin-top: 40px">
+                    <span class="text">下载</span>
+                    <span><i class="layui-icon layui-icon-download-circle"
+                             style="font-size: 30px;color: #FFFFFF;"></i></span>
+                </div>
+            </div>
+            <div class="layui-col-md6" style="background-color: #438eb9;text-align: center;height: 125px;">
+                <p class="text" style="margin-top: 50px" th:text="${logNum}"></p>
+            </div>
+        </div>
+        <div class="layui-col-md2" style="margin-left: 2%;width: 22%">
+            <div class="layui-col-md6" style="background-color: #9cd159;text-align: center;height: 125px;">
+                <div style="margin-top: 40px">
+                    <span class="text">评论</span>
+                    <span><i class="layui-icon layui-icon-dialogue"
+                             style="font-size: 30px;color: #FFFFFF;"></i></span>
+                </div>
+            </div>
+            <div class="layui-col-md6" style="background-color: #72b63f;text-align: center;height: 125px;">
+                <p class="text" style="margin-top: 50px" th:text="${commentNum+'条'}"></p>
+            </div>
+        </div>
+        <div class="layui-col-md2" style="margin-left: 2%;width: 22%">
+            <div class="layui-col-md6" style="background-color: #ff7171;text-align: center;height: 125px;">
+                <div style="margin-top: 40px">
+                    <span class="text">资源数</span>
+                    <span><i class="layui-icon layui-icon-form"
+                             style="font-size: 30px;color: #FFFFFF;"></i></span>
+                </div>
+            </div>
+            <div class="layui-col-md6" style="background-color: #ff5757;text-align: center;height: 125px;">
+                <p class="text" style="margin-top: 50px" th:text="${postInfoNum}"></p>
+            </div>
+        </div>
+        <div class="layui-col-md2" style="margin-left: 2%;width: 22%">
+            <div class="layui-col-md6" style="background-color: #ad96d6;text-align: center;height: 125px;">
+                <div style="margin-top: 40px">
+                    <span class="text">用户</span>
+                    <span><i class="layui-icon layui-icon-username"
+                             style="font-size: 30px;color: #FFFFFF;"></i></span>
+                </div>
+            </div>
+            <div class="layui-col-md6" style="background-color: #8775a7;text-align: center;height: 125px;">
+                <p class="text" style="margin-top: 50px" th:text="${userNum+'人'}"></p>
+            </div>
+        </div>
+    </div>
+    <!--<div id="form_demo layui-form" style="margin-top: 40px;margin-left: -30px ">
+        <input hidden id="id" th:value="${wbeParameter.id}"/>
+        <table class="book_table" border="1" cellpadding="10">
+            <tr>
+                <td class="table_td"><p>网站logo</p><span></span></td>
+                <td colspan="3"><input type="text" class="book_input03" name="logo" id="logo"
+                                       th:value="${wbeParameter.logo}"/></td>
+                <td class="table_td"><p>网站名称</p><span></span></td>
+                <td colspan="3">
+                    <input type="text" id="name" class="book_input03" name="name" th:value="${wbeParameter.name}"/>
+                </td>
+            </tr>
+            <tr>
+                <td class="table_td"><p>友情链接1</p><span></span></td>
+                <td><input type="text" class="book_input03" name="logo" id="link1" th:value="${wbeParameter.link1}"/>
+                </td>
+                <td class="table_td"><p>友情链接2</p><span></span></td>
+                <td><input type="text" id="link2" class="book_input03" name="link2" th:value="${wbeParameter.link2}"/>
+                </td>
+                <td class="table_td"><p>友情链接3</p><span></span></td>
+                <td><input type="text" id="link3" class="book_input03" name="link3" th:value="${wbeParameter.link3}"/>
+                </td>
+                <td class="table_td"><p>友情链接4</p><span></span></td>
+                <td><input type="text" id="link4" class="book_input03" name="link4" th:value="${wbeParameter.link4}"/>
+                </td>
+            </tr>
+        </table>
+        <button lay-submit="" lay-filter="Submit" class="submitBtn layui-btn">保存修改</button>-->
+
+</div>
+<script type="text/javascript" src="/resource/common/layui/layui.js"></script>
+<!--<script type="text/javascript" src="/resource/js/front/index.js"></script>-->
+
+<script type="text/javascript">
+    layui.use(['layer', 'layedit', 'form', 'upload','carousel'], function () {
+        var table = layui.table,
+            $ = layui.$,
+            layer = layui.layer,
+            upload = layui.upload,
+            layedit = layui.layedit,
+            form = layui.form,
+            carousel = layui.carousel;
+        carousel.render({
+            elem: '#test1'
+            , width: '100%' //设置容器宽度
+            , arrow: 'always' //始终显示箭头
+            //,anim: 'updown' //切换动画方式
+            });//导航的hover效果、二级菜单等功能，需要依赖element模块
+        upload.render({
+            elem: '#uploadBtn'
+            , url: '/upload.do'
+            , before: function (obj) {
+                //预读本地文件示例，不支持ie8
+                obj.preview(function (index, file, result) {
+                    $('#uploadBtn').attr('src', result); //图片链接（base64）
+                });
+            }
+            , done: function (res) {
+                console.log(res)
+                //如果上传失败
+                if (!res.status) {
+                    return layer.msg('上传失败');
+                }
+                $("#bottomImg").val(res.obje);
+                return layer.msg('上传成功');
+            }
+            , error: function () {
+                return layer.msg('上传失败');
+            }
+        });
+        upload.render({
+            elem: '#uploadBtn1'
+            , url: '/upload.do'
+            , before: function (obj) {
+                //预读本地文件示例，不支持ie8
+                obj.preview(function (index, file, result) {
+                    $('#uploadBtn1').attr('src', result); //图片链接（base64）
+                });
+            }
+            , done: function (res) {
+                console.log(res)
+                //如果上传失败
+                if (!res.status) {
+                    return layer.msg('上传失败');
+                }
+                $("#backgroundImg").val(res.obje);
+                return layer.msg('上传成功');
+            }
+            , error: function () {
+                return layer.msg('上传失败');
+            }
+        });
+        form.on('submit(Submit)', function (data) {
+            var id = $("#id").val();
+            var logo = $("#logo").val();
+            var name = $("#name").val();
+            var link1 = $("#link1").val();
+            var link2 = $("#link2").val();
+            var link3 = $("#link3").val();
+            var link4 = $("#link4").val();
+            var aboutWe = layedit.getContent(index)
+            $.ajax({
+                url: '/wbeSet/wbeParameter.do',
+                type: 'put',
+                data: {
+                    "id": id,
+                    "logo": logo,
+                    "name": name,
+                    "link1": link1,
+                    "link2": link2,
+                    "link3": link3,
+                    "link4": link4,
+                    "aboutWe": aboutWe
+                },
+                dataType: 'json',
+                async: false,
+                success: function (result) {
+                    if (result.status) {
+                        layer.msg("修改成功!")
+                    } else {
+                        alert("修改失败!")
+                    }
+                }
+
+            });
+        });
+        layedit.set({
+            //暴露layupload参数设置接口 --详细查看layupload参数说明
+            uploadImage: {
+                url: '/layeditUpload.do',
+                accept: 'image',
+                acceptMime: 'image/*',
+                exts: 'jpg|png|gif|bmp|jpeg',
+                size: '10240'
+            }
+            , uploadVideo: {
+                url: '/layeditUpload.do',
+                accept: 'video',
+                acceptMime: 'video/*',
+                exts: 'mp4|flv|avi|rm|rmvb|mp3',
+                size: '20480'
+            }
+            //右键删除图片/视频时的回调参数，post到后台删除服务器文件等操作，
+            //传递参数：
+            //图片： imgpath --图片路径
+            //视频： filepath --视频路径 imgpath --封面路径
+            , calldel: {
+                url: '/Attachment/DeleteFile'
+            }
+            //开发者模式 --默认为false
+            , devmode: true
+            //插入代码设置
+            , codeConfig: {
+                hide: true,  //是否显示编码语言选择框
+                default: 'javascript' //hide为true时的默认语言格式
+            }
+            , tool: [
+                'code', 'strong', 'italic', 'underline', 'del', 'addhr', '|', 'fontFomatt', 'colorpicker', 'face'
+                , '|', 'left', 'center', 'right', '|', 'link', 'unlink', 'images', 'image_alt', 'video', 'anchors'
+                , '|', 'table', 'fullScreen']
+
+        });
+        var index = layedit.build('aboutWe', {
+            height: 400 //设置编辑器高度
+        });
+    });
+
+</script>
+</body>
+</html>

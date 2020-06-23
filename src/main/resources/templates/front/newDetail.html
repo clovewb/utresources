@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/resource/common/layui/css/layui.css" media="all"/>
+    <link rel="stylesheet" href="/resource/css/global.css">
+    <link rel="stylesheet" href="/resource/css/news.css">
+</head>
+<body>
+<div th:replace="front/public:: heads"></div>
+<div class="layui-container news-detail">
+    <div class="layui-row layui-col-space40">
+        <div class="layui-col-sm8">
+            <div class="detail-main">
+                <div class="detail-cont">
+                    <h1 th:text="${newsOne.name}"></h1>
+                    <div class="newsClass"><span th:text="${newsOne.categoryName}"></span><span
+                            th:text="${newsOne.userName}"></span> <b
+                            th:text="${#strings.substring(newsOne.time,0,19)}"></b></div>
+                    <p th:utext="${newsOne.content}"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--底部引用-->
+<div th:replace="front/public :: footer"></div>
+<!-- layui.js -->
+<script type="text/javascript" src="/resource/common/layui/layui.js"></script>
+<script type="text/javascript" src="/resource/js/front/house.js"></script>
+<!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+<!--[if lt IE 9]>
+<script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+<script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+<![endif]-->
+<script>
+    layui.use('element', function () {
+        var element = layui.element; //导航的hover效果、二级菜单等功能，需要依赖element模块
+    });
+</script>
+
+</body>
+</html>

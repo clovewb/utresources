@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <title></title>
+    <meta name="renderer" content="webkit"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="format-detection" content="telephone=no"/>
+    <link href="/resource/css/index.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="/resource/common/layui/css/layui.css" media="all"/>
+</head>
+<style>
+</style>
+<body class="index">
+<div class="layui-form" style="margin:auto;margin-top:10px">
+    <div class="top">
+        <div class="layui-form-item">
+            <table class="layui-table" lay-skin="line">
+                <tbody>
+                <tr th:each="chdCategory:${chdCategoryList}">
+                    <td style="text-align: center" th:text="${chdCategory.name}">贤心</td>
+                    <td style="text-align: center;color: #40AFFE" th:id="${chdCategory.id}" onclick="delChd(this)">删除
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="notice_bot">
+            <div class="r_right but_p">
+                <button class="but_close" onclick="Cancel()">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="/resource/common/layui/layui.js"></script>
+<script type="text/javascript" th:inline="javascript">
+
+    var Cancel;
+    var delChd;
+    layui.use(['table', 'layer', 'upload', 'form'], function () {
+        var table = layui.table,
+            $ = layui.$,
+            layer = layui.layer,
+            upload = layui.upload,
+            form = layui.form;
+        Cancel = function () {
+            parent.layer.close(parent.layer.getFrameIndex(window.name));
+        }
+        delChd = function (param) {
+            var id = param.getAttribute("id");
+            $.ajax({
+                url: "/category/chdCategory.do",
+                type: "post",
+                data: {_method: "DELETE", "id": id},
+                dataType: "json",
+                success: function (result) {
+                    if (!result.status) {
+                        layer.msg(result.msg, {time: 2000});
+                        return false;
+                    }
+                    layer.msg("删除成功!", {time: 1000});
+                    location.reload();
+                    parent.layui.table.reload('tableId', {});
+                }
+            });
+        }
+
+    });
+
+</script>
+
+</body>
+</html>

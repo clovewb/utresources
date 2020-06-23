@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>添加权限</title>
+    <meta name="renderer" content="webkit"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="format-detection" content="telephone=no"/>
+    <link rel="stylesheet" href="/resource/common/layui/css/layui.css" media="all"/>
+    <link href="/resource/css/table.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="/resource/ztree/css/zTreeStyle/zTreeStyle.css" type="text/css">
+    <link href="/resource/js/bstable/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link href="/resource/js/bstable/css/bootstrap-table.css" rel="stylesheet" type="text/css">
+</head>
+
+<body class="index">
+<div class="warrant_nav">
+    <div class="clear"></div>
+</div>
+
+<div class="warrant_main">
+    <div class="tree_left" style="display: block">
+        <div class="tree_left_top">
+            <div class=" order_ztree l_left organize_ztree" style="width: 100%">
+                <p>
+                <ul id="treeDemo" class="ztree" style=" overflow:auto;margin-left: 20px"></ul>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="notice_bot">
+    <div class="r_right but_p">
+        <button class="but_save" onclick="getCheckNodes()">保存</button>
+        <button class="but_close" onclick="Cancel()">关闭</button>
+    </div>
+</div>
+<script type="text/javascript" src="/resource/common/layui/layui.js"></script>
+<script type="text/javascript" src="/resource/ztree/js/jquery-1.4.4.min.js"></script>
+<script type="text/javascript" src="/resource/ztree/js/jquery.ztree.core.js"></script>
+<script type="text/javascript" src="/resource/ztree/js/jquery.ztree.excheck.js"></script>
+<script type="text/javascript" th:inline="javascript">
+    var Cancel;
+    layui.use(['table', 'layer', 'laydate', 'form'], function () {
+        var table = layui.table,
+            $ = layui.$,
+            layer = layui.layer,
+            form = layui.form;
+        Cancel = function () {
+            parent.layer.close(parent.layer.getFrameIndex(window.name));
+        }
+        var roleId = [[${roleId}]];
+        active = {
+            reload: function () {
+                var permissionType = $('#permissionType').val();
+                var permissionName = $('#permissionName').val();
+                //执行重载
+                table.reload('tableId', {
+                    where: {
+                        permissionName: permissionName,
+                        permissionType: permissionType,
+                        roleId: roleId
+                    }
+                });
+            }
+        };
+    });
+
+</script>
+<script LANGUAGE="JavaScript" th:inline="javascript">
+    var zTreeObj;
+    // zTree 的参数配置，深入使用请参考 API 文档（setting 配置详解）
+    var setting = {
+        check: {
+            enable: true,
+        },
+        view: {
+            showLine: true, //显示辅助线
+            dblClickExpand: true,
+        },
+        data: {enable: true},
+    };
+    // zTree 的数据属性，深入使用请参考 API 文档（zTreeNode 节点数据详解）
+    console.log([[${sysList}]])
+    var zNodes = [[${sysList}]];
+
+    $(document).ready(function () {
+        zTreeObj = $.fn.zTree.init($("#treeDemo"), setting, zNodes);
+    });
+
+    //保存
+    function getCheckNodes() {
+        var treeObj = $.fn.zTree.getZTreeObj("treeDemo"),
+            nodes = treeObj.getCheckedNodes(true);
+        var dataNodes = "";
+        if (0 === nodes.length) {
+            console.log("请选择!");
+            return;
+        } else {
+            for (var i = 0; i < nodes.length; i++) {
+                dataNodes += nodes[i].id + ",";
+            }
+            console.log(dataNodes); //获取选中节点的值
+            addPermission(dataNodes)
+        }
+    }
+
+    //角色授权方法
+    function addPermission(ids) {
+        layer.confirm('确认该操作?', function (index) {
+            $.ajax({
+                url: "/permission/addPermission.do",
+                type: "post",
+                data: {"ids": ids, "roleId": [[${roleId}]]},
+                dataType: "json",
+                success: function (result) {
+                    if (!result.status) {
+                        layer.msg(result.msg, {time: 2000});
+                        return false;
+                    }
+                    parent.layer.msg("操作成功!", {time: 1000});
+                }
+            });
+            parent.layer.close(parent.layer.getFrameIndex(window.name));
+        })
+    }
+</script>
+</body>
+</html>

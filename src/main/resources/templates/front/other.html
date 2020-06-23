@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/resource/common/layui/css/layui.css" media="all"/>
+    <link rel="stylesheet" href="/resource/css/global.css">
+</head>
+<body>
+
+
+<!--顶部引用-->
+<div th:replace="front/public:: heads"></div>
+
+<div class="fly-home fly-panel">
+    <img th:src="${user.imgUrl}">
+    <h1>
+        <span th:text="${user.userName}"></span>
+        <i class="iconfont icon-nan" th:if="${user.sex eq'男'}"></i>
+        <i class="iconfont icon-nv" th:if="${user.sex eq'女'}"></i>
+        <!--
+        <span style="color:#c00;">（管理员）</span>
+        <span>（该号已被封）</span>
+        -->
+    </h1>
+
+    <!--<p style="padding: 10px 0; color: #5FB878;">认证信息：layui 作者</p>-->
+
+    <p class="fly-home-info">
+        <i class="iconfont icon-shijian"></i><span th:text="${#strings.substring(user.createdDate,0,11)+'加入'}"></span>
+        <i class="iconfont icon-chengshi"></i><span th:text="${'来自'+user.address}"></span>
+    </p>
+
+
+    <div class="fly-sns" data-user="">
+        <a href="javascript:;" th:if="${!isAttention}" th:id="${user.id}"
+           class="layui-btn layui-btn-primary fly-imActive addFriend"
+           data-type="addFriend"
+           style="color: #FFFFFF;background-color: #a6d177">关注</a>
+        <a href="javascript:;" th:if="${isAttention}" th:id="${user.id}"
+           class="layui-btn layui-btn-primary fly-imActive addFriend"
+           data-type="addFriend">取消关注</a>
+    </div>
+
+</div>
+
+<div class="layui-container">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md4 fly-home-jie">
+            <div class="fly-panel">
+                <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+                    <ul class="layui-tab-title">
+                        <li class="layui-this">他的关注（<span th:text="${attentionListNum}"></span>）</li>
+                        <li>他的粉丝（<span th:text="${fenAttentionListNum}"></span>）</li>
+                    </ul>
+                    <div class="layui-tab-content" style="height: 100px;">
+                        <div class="layui-tab-item layui-show">
+                            <div th:each="item:${attentionList}" style="border-bottom: 1px solid #e6e6e6 ">
+                                <a th:href="${'/front/other.do?userId='+item.user.id}">
+                                    <img th:src="${item.user.imgUrl}"
+                                         style="width: 40px;height: 40px;border-radius:50%">
+                                    <span th:text="${item.user.userName}"></span>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="layui-tab-item">
+                            <div th:each="item:${fenAttentionList}" style="border-bottom: 1px solid #e6e6e6 ">
+                                <a th:href="${'/front/other.do?userId='+item.user.id}">
+                                    <img th:src="${item.user.imgUrl}"
+                                         style="width: 40px;height: 40px;border-radius:50%">
+                                    <span th:text="${item.user.userName}"></span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-md3 fly-home-jie">
+            <div class="fly-panel">
+                <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+                    <ul class="layui-tab-title">
+                        <li class="layui-this">他的资源</li>
+                    </ul>
+                    <div class="layui-tab-content" style="height: 100px;">
+                        <div class="layui-tab-item layui-show">
+                            <div th:each="item:${postInfoList}" style="border-bottom: 1px solid #e6e6e6 ">
+                                <a th:href="${'/front/postInfoDetail.do?id='+item.id}" th:text="${item.name}">
+                                </a>
+                            </div>
+                        </div>
+                        <div class="layui-tab-item">
+                            <div th:each="item:${fenAttentionList}" style="border-bottom: 1px solid #e6e6e6 ">
+                                <a th:href="${'/front/other.do?userId='+item.user.id}">
+                                    <img th:src="${item.user.imgUrl}"
+                                         style="width: 40px;height: 40px;border-radius:50%">
+                                    <span th:text="${item.user.userName}"></span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-md5 fly-home-da">
+            <div class="fly-panel">
+                <h3 class="fly-panel-title" th:text="${user.userName+' 最近的评论'}"></h3>
+                <ul class="home-jieda">
+                    <li th:if="${commentList!=null}" th:each="comment:${commentList}">
+                        <p>
+                            <span th:text="${#strings.substring(comment.time,0,19)}">1分钟前</span>
+                            在<a th:href="${'/front/postInfoDetail.do?id='+comment.postInfo.id}" target="_blank"
+                                th:text="${comment.postInfo.name}"></a>中评论：
+                        </p>
+                        <div class="home-dacontent" th:utext="${comment.content}">
+
+                        </div>
+                    </li>
+                    <div th:if="${commentList==null}" class="fly-none"
+                         style="min-height: 50px; padding:30px 0; height:auto;"><span>没有评论任何资源</span></div>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<!--底部引用-->
+<div th:replace="front/public :: footer"></div>
+
+
+<script type="text/javascript" src="/resource/common/layui/layui.js"></script>
+<script type="text/javascript" src="/resource/js/front/index.js"></script>
+<script th:inline="javascript">
+    layui.use(['table', 'layer', 'form', 'laypage'], function () {
+        var table = layui.table,
+            $ = layui.$,
+            layer = layui.layer,
+            laypage = layui.laypage,
+            form = layui.form;
+        //
+        $('.addFriend').on('click', function () {
+            var id = $(this).attr("id");
+            $.ajax({
+                url: '/front/addFriend.do',
+                type: 'post',
+                data: {"attenId": id},
+                dataType: 'json',
+                async: false,
+                success: function (result) {
+                    if (!result.status) {
+                        parent.layer.msg(result.msg, {time: 2000});
+                        return false;
+                    } else {
+                        layer.msg(result.msg, {
+                            time: 900,
+                            end: function () {
+                                location.reload()
+                            }
+                        })
+                    }
+                }
+            });
+        })
+    });
+</script>
+
+</body>
+</html>

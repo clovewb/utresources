@@ -1,0 +1,149 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title></title>
+    <link href="/resource/css/table.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="/resource/common/layui/css/layui.css" media="all"/>
+</head>
+<style>
+    .layui-upload-img {
+        width: 200px;
+        height: 200px;
+    }
+
+    .submitBtn {
+        margin-top: 40px;
+        margin-left: 49%;
+    }
+</style>
+<body style="background-color: #e6ecf5;min-width: 1100px">
+<div class="book_con01">
+    <h1 class="book_h01">个人信息</h1>
+    <div id="form_demo layui-form">
+        <input hidden id="id" th:value="${user.id}"/>
+        <table class="book_table" border="1" cellpadding="10">
+            <!-- <tr>
+                 <td class="table_td"><p>主题</p><span>*</span></td>
+                 <td colspan="5"><input type="text" class="book_input03" name="name" minlength="2" required/></td>
+             </tr>-->
+            <tr>
+                <td class="table_td"><p>用户名</p><span></span></td>
+                <td><input type="text" class="book_input03" name="userName" readonly id="userName"
+                           th:value="${user.userName}"
+                           minlength="2"
+                           required/></td>
+                <td class="table_td"><p>真实姓名</p><span></span></td>
+                <td>
+                    <input type="text" th:value="${user.realName}" id="realName" class="book_input03"/>
+                </td>
+                <td class="table_td"><p>住址</p><span></span></td>
+                <td>
+                    <input type="text" th:value="${user.address}" id="address" class="book_input03"/>
+                </td>
+            </tr>
+            <tr>
+                <td class="table_td"><p>联系电话</p><span></span></td>
+                <td>
+                    <input type="text" th:value="${user.iphone}" id="iphone" class="book_input03"/>
+                </td>
+                <td class="table_td"><p>邮箱</p><span></span></td>
+                <td>
+                    <input type="email" th:value="${user.email}" id="email" class="book_input03"/>
+                </td>
+            </tr>
+            <tr>
+                <td class="table_td"><p>性别</p><span></span></td>
+                <td colspan="5" class="sex">
+                    <input type="radio" class="input_radio" value="男" th:field="*{user.sex}" name="sex"/><a>男</a>
+                    <input type="radio" class="input_radio" value="女" th:field="*{user.sex}" name="sex"/><a>女</a></td>
+            </tr>
+            <tr>
+                <td class="table_td table_td1"><p>头像</p><span></span></td>
+                <td colspan="5" class="sex">
+                    <div class="layui-upload">
+                        <div class="layui-upload-list">
+                            <img class="layui-upload-img" th:src="${user.imgUrl}" id="uploadBtn">
+                            <p id="demoText"></p>
+                            <input name="imgUrl" th:value="${user.imgUrl}" hidden id="imgUrl"/>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+        <button lay-submit="" lay-filter="Submit" class="submitBtn">保存修改</button>
+    </div>
+</div>
+<script type="text/javascript" src="/resource/common/layui/layui.js"></script>
+<script type="text/javascript">
+
+
+    layui.use(['layer', 'laydate', 'form', 'upload',], function () {
+        var table = layui.table,
+            $ = layui.$,
+            layer = layui.layer,
+            upload = layui.upload,
+            form = layui.form;
+        var uploadInst = upload.render({
+            elem: '#uploadBtn'
+            , url: '/upload.do'
+            , before: function (obj) {
+                //预读本地文件示例，不支持ie8
+                obj.preview(function (index, file, result) {
+                    $('#uploadBtn').attr('src', result); //图片链接（base64）
+                });
+            }
+            , done: function (res) {
+                console.log(res)
+                //如果上传失败
+                if (!res.status) {
+                    return layer.msg('上传失败');
+                }
+                $("#imgUrl").val(res.obje);
+                return layer.msg('上传成功');
+            }
+            , error: function () {
+                return layer.msg('上传失败');
+            }
+        });
+        form.on('submit(Submit)', function (data) {
+            var id = $("#id").val();
+            var userName = $("#userName").val();
+            var realName = $("#realName").val();
+            var address = $("#address").val();
+            var iphone = $("#iphone").val();
+            var imgUrl = $("#imgUrl").val();
+            var email = $("#email").val();
+            var sex = $("input[name='sex']:checked").val();
+            $.ajax({
+                url: '/user/user.do',
+                type: 'put',
+                data: {
+                    "id": id,
+                    "userName": userName,
+                    "realName": realName,
+                    "address": address,
+                    "iphone": iphone,
+                    "imgUrl": imgUrl,
+                    "email": email,
+                    "sex": sex
+                },
+                dataType: 'json',
+                async: false,
+                success: function (result) {
+                    if (result.status) {
+                        layer.msg("修改成功!")
+                    } else {
+                        alert("修改失败!")
+                    }
+                }
+
+            });
+        });
+    });
+
+</script>
+</body>
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>用户中心</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/resource/common/layui/css/layui.css">
+    <link rel="stylesheet" href="/resource/css/global.css">
+</head>
+<style>
+    .layui-this-my a {
+        color: #a6d177 !important;
+        background-color: #FFFFFF !important;
+    }
+
+    .layui-nav-item-my :hover {
+        color: #a6d177 !important;
+        background-color: #FFFFFF !important;
+    }
+</style>
+<body>
+
+<div th:replace="front/public :: heads"></div>
+
+<div class="layui-container fly-marginTop fly-user-main">
+    <ul class="layui-nav layui-nav-tree layui-inline" lay-filter="user"
+        style="background-color: #ffffff;">
+        <li class="layui-nav-item layui-nav-item-my layui-this-my">
+            <a href="/front/perCenter.do" style="color: #0C0C0C">
+                <i class="layui-icon">&#xe612;</i>
+                资源中心<i class="layui-icon" style="float: right;font-size: 10px">&#xe602;</i>
+            </a>
+        </li>
+        <li class="layui-nav-item layui-nav-item-my">
+            <a href="/front/myHome.do" style="color: #0C0C0C">
+                <i class="layui-icon">&#xe609;</i>
+                我的主页<i class="layui-icon" style="float: right;font-size: 10px">&#xe602;</i>
+            </a>
+        </li>
+        <li class="layui-nav-item layui-nav-item-my">
+            <a href="/front/security.do" style="color: #0C0C0C">
+                <i class="layui-icon">&#xe620;</i>
+                安全设置 <i class="layui-icon" style="float: right;font-size: 10px">&#xe602;</i>
+            </a>
+        </li>
+        <li class="layui-nav-item layui-nav-item-my">
+            <a href="/front/setUserInfo.do" style="color: #0C0C0C">
+                <i class="layui-icon">&#xe642;</i>
+                个人信息<i class="layui-icon" style="float: right;font-size: 10px">&#xe602;</i>
+            </a>
+        </li>
+    </ul>
+    <div class="fly-panel fly-panel-user" pad20>
+        <div class="layui-tab layui-tab-brief" lay-filter="user">
+            <ul class="layui-tab-title" id="LAY_mine">
+                <li data-type="mine-jie" lay-id="index" class="layui-this"
+                    style="color: #a6d177;">我的资源（<span
+                        th:text="${myListNum}"></span>）
+                </li>
+                <li data-type="collection"
+                    style="color: #a6d177;">我的收藏（<span
+                        th:text="${collectNum}"></span>）
+                </li>
+            </ul>
+            <div class="layui-tab-content" style="padding: 20px 0;">
+                <div class="layui-tab-item layui-show">
+                    <ul class="mine-view jie-row">
+                        <li th:each="my:${myList}">
+                            <a class="jie-title" th:href="${'/front/postInfoMyDetail.do?id='+my.id}"
+                               th:text="${my.name}"></a>
+                            <span class="layui-badge" th:text="${my.commentNoCount}"
+                                  th:if="${my.commentNoCount !=0}"
+                                  style="background-color: red;margin-left: 2px"></span>
+                            <i th:text="${#strings.substring(my.createTime,0,19)}"></i>
+                            <a class="mine-edit" th:href="${'/front/editPostInfo.do?id='+my.id}">编辑</a>
+                            <a class="mine-edit del" th:id="${my.id}">删除</a>
+                            <em th:text="${my.pageView+'阅/'+my.observer+'答'}">661阅/10答</em>
+                        </li>
+                    </ul>
+                    <div id="LAY_page"></div>
+                </div>
+                <div class="layui-tab-item">
+                    <ul class="mine-view jie-row">
+                        <li th:each="collect:${collectList}">
+                            <a class="jie-title" th:href="${'/front/postInfoDetail.do?id='+collect.postInfo.id}"
+                               target="_blank"
+                               th:text="${collect.postInfo.name}"></a>
+                            <i th:text="${#strings.substring(collect.postInfo.createTime,0,19)}"></i>
+                            <a class="mine-collect mine-edit" th:id="${collect.postInfo.id}">取消收藏</a>
+                            <em th:text="${collect.postInfo.pageView+'阅/'+collect.postInfo.observer+'答'}">661阅/10答</em>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="/resource/common/layui/layui.js"></script>
+<script>
+    layui.use(['table', 'element', 'layer', 'laydate', 'form'], function () {
+        var table = layui.table,
+            $ = layui.$,
+            element = layui.element,
+            layer = layui.layer,
+            form = layui.form
+        //自定义验证规则
+        form.verify({
+            userName: function (value) {
+                if (value.length < 5) {
+                    return '账号至少得5个字符';
+                }
+            }
+            , pass: [/^[\S]{6,12}$/, '密码必须6到12位，且不能出现空格']
+            , content: function (value) {
+                layedit.sync(editIndex);
+            }
+        });
+        $('.del').on('click', function () {
+            var id = $(this).attr('id');
+            layer.confirm('是否删除?', function (index) {
+                $.ajax({
+                    url: "/postInfo/postInfo.do",
+                    type: "post",
+                    data: {_method: "DELETE", "id": id},
+                    dataType: "json",
+                    success: function (result) {
+                        if (!result.status) {
+                            layer.msg(result.msg, {time: 2000});
+                            return false;
+                        }
+                        layer.msg("删除成功!", {time: 1000});
+                        active.reload();
+                    }
+                });
+                layer.close(index);
+            })
+        })
+        form.on('submit(changePwd)', function (data) {
+            if ($("#confirmPwd").val() != $("#newPwd").val()) {
+                layer.msg("两次密码输入不一致!");
+                return false;
+            }
+            $.ajax({
+                url: '/updatePas',
+                type: 'post',
+                data: data.field,
+                dataType: 'json',
+                async: false,
+                success: function (result) {
+                    if (result.status) {
+                        $("#oldPas").val("");
+                        $("#newPwd").val("");
+                        $("#confirmPwd").val("");
+                        layer.msg("设置成功!");
+                    } else {
+                        layer.msg(result.msg);
+                    }
+                    form.render();
+                }
+
+            });
+        });
+        $('.mine-collect').on('click', function () {
+            var id = $(this).attr("id");
+            $.ajax({
+                url: '/front/collect.do',
+                type: 'post',
+                data: {"postId": id},
+                dataType: 'json',
+                async: false,
+                success: function (result) {
+                    if (!result.status) {
+                        parent.layer.msg(result.msg, {time: 2000});
+                        return false;
+                    } else {
+                        layer.msg('成功！', {
+                            time: 900,
+                            end: function () {
+                                location.reload()
+                            }
+                        })
+                    }
+                }
+            });
+        })
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <title></title>
+    <meta name="renderer" content="webkit"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="format-detection" content="telephone=no"/>
+    <link rel="stylesheet" href="/resource/common/layui/css/layui.css" media="all"/>
+    <link href="/resource/js/bstable/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link href="/resource/js/bstable/css/bootstrap-table.css" rel="stylesheet" type="text/css">
+    <link href="/resource/css/table.css" rel="stylesheet" type="text/css">
+</head>
+<style>
+</style>
+<body style="background-color: #ecf0f5;font-family: 楷体;color: #475059;overflow: auto">
+<div class="notice_main ">
+    <table id="postInfoTables" lay-filter="postInfoTables"></table>
+</div>
+<script type="text/html" id="operate">
+    {{#  if(d.state=='0'){ }}
+    <a class="toolbarMy" lay-event="show">显示</a>
+    {{#  } else if(d.state=='1'){ }}
+    <a class="toolbarMy" lay-event="hide">隐藏</a>
+    {{#  } }}
+    <a class="toolbarMy" lay-event="del">删除</a>
+</script>
+<script type="text/javascript" src="/resource/common/layui/layui.js"></script>
+<script type="text/javascript" th:inline="javascript">
+    layui.use(['table', 'layer', 'laydate', 'form'], function () {
+        var table = layui.table,
+            $ = layui.$,
+            layer = layui.layer,
+            laydate = layui.laydate,
+            form = layui.form;
+        var postId = [[${postId}]]
+        table.render({
+            elem: '#postInfoTables'
+            , url: '/postInfo/comment.do' //数据接口
+            , method: 'get'
+            , page: true //开启分页
+            , id: 'tableId'
+            , where: {'postId': postId}
+            , limits: [10, 15, 30]
+            , limit: 15
+            , cols: [
+                [ //表头
+                    {field: 'userName', title: '评论用户', 'fixed': 'left'}
+                    , {field: 'time', title: '评论时间'}
+                    , {field: 'content', title: '评论内容'}
+                    , {field: 'stateType', title: '是否显示'}
+                    , {title: '操作', toolbar: '#operate', 'fixed': 'right'}
+                ]
+            ]
+        });
+        //搜索
+        $('#search').on('click', function () {
+            active.reload()
+        });
+        //监听父分类选择框
+        $('#categoryId').change(function () {
+            $.ajax({
+                url: '/category/getChdCategory.do',
+                type: 'post',
+                data: {'ptId': $('#categoryId').val()},
+                dataType: 'json',
+                success: function (data) {
+                    var htmlStr = "<option value=''>请选择</option>";
+                    for (var i = 0; i < data.length - 1; i++) {
+                        htmlStr += "<option value='" + data[i].id + "'>" + data[i].name + "</option>"
+                    }
+                    $("#chdCategoryId").html(htmlStr);
+                }
+            })
+        })
+        //监听工具条
+        table.on('tool(postInfoTables)', function (obj) {
+            var data = obj.data;
+            console.log(data);
+            if (obj.event === 'details') {
+                //查看详情
+            } else if (obj.event === 'del') {
+                //删除
+                delProduct(data.id);
+            } else if (obj.event === "edit") {
+                //修改
+                location.href = "/postInfo/editPostInfo.do?id=" + data.id
+            } else if (obj.event === "show") {
+                editProduct(data.id, "1")
+            } else if (obj.event === "hide") {
+                editProduct(data.id, "0")
+            }
+        });
+
+        //删除函数
+        function delProduct(id) {
+            layer.confirm('是否删除?', function (index) {
+                $.ajax({
+                    url: "/postInfo/comment.do",
+                    type: "post",
+                    data: {_method: "DELETE", "id": id},
+                    dataType: "json",
+                    success: function (result) {
+                        if (!result.status) {
+                            layer.msg(result.msg, {time: 2000});
+                            return false;
+                        }
+                        layer.msg("删除成功!", {time: 1000});
+                        active.reload();
+                    }
+                });
+                layer.close(index);
+            })
+        }
+
+        //删除函数
+        function editProduct(id, state) {
+            $.ajax({
+                url: "/postInfo/comment.do",
+                type: "put",
+                data: {"id": id, "state": state},
+                dataType: "json",
+                success: function (result) {
+                    if (!result.status) {
+                        layer.msg(result.msg, {time: 2000});
+                        return false;
+                    }
+                    layer.msg("操作成功!", {time: 1000});
+                    active.reload();
+                }
+            });
+        }
+
+        active = {
+            reload: function () {
+
+                //执行重载
+                table.reload('tableId', {
+                    method: 'get'
+                    , page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+
+                });
+            }
+        };
+    });
+</script>
+
+</body>
+</html>

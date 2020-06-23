@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <title></title>
+    <meta name="renderer" content="webkit"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="format-detection" content="telephone=no"/>
+    <link rel="stylesheet" href="/resource/common/layui/css/layui.css" media="all"/>
+    <link href="/resource/js/bstable/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link href="/resource/js/bstable/css/bootstrap-table.css" rel="stylesheet" type="text/css">
+    <link href="/resource/css/table.css" rel="stylesheet" type="text/css">
+</head>
+<style>
+</style>
+<body style="background-color: #ecf0f5;font-family: 楷体;color: #475059;overflow: auto">
+<div class="notice_main ">
+    <div class="notice_check" style="padding: 16px 15px 8px 15px">
+        <p>
+            <label class="">标题：</label>
+            <input type="text" id="name" class="find_input" style="width: 150px">
+            <label class="">创建时间：</label>
+            <input type="text" id="createTime" class="find_input" style="width: 150px">
+            <label class="">资源分类：</label>
+            <select id="categoryId" name="category" class="find_input" style="width: 150px">
+                <option value="">请选择</option>
+                <option th:each="category:${categoryList}" th:value="${category.id}"
+                        th:text="${category.name}"></option>
+            </select>
+            <select id="chdCategoryId" class="chdCategory" class="find_input" style="width: 150px">
+            </select>
+            <button class="check_btn" id="search">查询</button>
+        </p>
+        <p style="margin-top: 20px">
+
+        </p>
+    </div>
+    <table id="postInfoTables" lay-filter="postInfoTables"></table>
+</div>
+<script type="text/html" id="operate">
+    <a class="toolbarMy" lay-event="edit">编辑</a>
+    <a class="toolbarMy" lay-event="del">删除</a>
+    <a class="toolbarMy" lay-event="look">查看评论</a>
+
+
+</script>
+<script type="text/javascript" src="/resource/common/layui/layui.js"></script>
+<script type="text/javascript">
+    layui.use(['table', 'layer', 'laydate', 'form'], function () {
+        var table = layui.table,
+            $ = layui.$,
+            layer = layui.layer,
+            laydate = layui.laydate,
+            form = layui.form;
+        laydate.render({
+            elem: '#createTime'
+            , type: 'datetime'//指定元素
+            , range: '~' //或 range: '~' 来自定义分割字符
+        });
+        table.render({
+            elem: '#postInfoTables'
+            , url: '/postInfo/postInfoTable.do' //数据接口
+            , method: 'get'
+            , page: true //开启分页
+            , id: 'tableId'
+            , limits: [10, 15, 30]
+            , limit: 15
+            , cols: [
+                [ //表头
+                    {field: 'userName', title: '发表用户', 'fixed': 'left'}
+                    , {field: 'name', title: '标题'}
+                    , {field: 'isTop', title: '置顶'}
+                    , {field: 'pageView', title: '浏览量'}
+                    , {field: 'observer', title: '评论数'}
+                    , {field: 'state', title: '是否展示'}
+                    , {field: 'createTime', title: '创建时间'}
+                    , {field: 'classifyName', title: '分类'}
+                    , {title: '操作', toolbar: '#operate', 'fixed': 'right'}
+                ]
+            ]
+        });
+        //搜索
+        $('#search').on('click', function () {
+            active.reload()
+        });
+        //监听父分类选择框
+        $('#categoryId').change(function () {
+            $.ajax({
+                url: '/category/getChdCategory.do',
+                type: 'post',
+                data: {'ptId': $('#categoryId').val()},
+                dataType: 'json',
+                success: function (data) {
+                    var htmlStr = "<option value=''>请选择</option>";
+                    for (var i = 0; i < data.length - 1; i++) {
+                        htmlStr += "<option value='" + data[i].id + "'>" + data[i].name + "</option>"
+                    }
+                    $("#chdCategoryId").html(htmlStr);
+                }
+            })
+        })
+        //监听工具条
+        table.on('tool(postInfoTables)', function (obj) {
+            var data = obj.data;
+            console.log(data);
+            if (obj.event === 'details') {
+                //查看详情
+            } else if (obj.event === 'del') {
+                //删除
+                delProduct(data.id);
+            } else if (obj.event === "edit") {
+                //修改
+                location.href = "/postInfo/editPostInfo.do?id=" + data.id
+            } else if (obj.event === "look") {
+                layer.open({
+                    type: 2,
+                    title: "查看评论",
+                    shadeClose: false, //点击遮罩关闭层
+                    area: ['700px', '578px'],
+                    content: "/postInfo/commentIndex.do?postId=" + data.id
+                });
+            }
+        });
+
+        //删除函数
+        function delProduct(id) {
+            layer.confirm('是否删除?', function (index) {
+                $.ajax({
+                    url: "/postInfo/postInfo.do",
+                    type: "post",
+                    data: {_method: "DELETE", "id": id},
+                    dataType: "json",
+                    success: function (result) {
+                        if (!result.status) {
+                            layer.msg(result.msg, {time: 2000});
+                            return false;
+                        }
+                        layer.msg("删除成功!", {time: 1000});
+                        active.reload();
+                    }
+                });
+                layer.close(index);
+            })
+        }
+
+        active = {
+            reload: function () {
+                var createTime = $("#createTime").val();
+                var name = $("#name").val();
+                var categoryId = $("#categoryId").val()
+                var chdCategoryId = $("#chdCategoryId").val()
+                //执行重载
+                table.reload('tableId', {
+                    url: '/postInfo/postInfoTable.do'
+                    , method: 'get'
+                    , page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                    , where: {
+                        createTime: createTime,
+                        name: name,
+                        categoryId: categoryId,
+                        chdCategoryId: chdCategoryId,
+                    }
+                });
+            }
+        };
+    });
+</script>
+
+</body>
+</html>

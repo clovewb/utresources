@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/resource/common/layui/css/layui.css" media="all"/>
+    <link rel="stylesheet" href="/resource/css/global.css">
+</head>
+<body>
+
+
+<!--顶部引用-->
+<div th:replace="front/public:: heads"></div>
+<div class="layui-carousel" id="test1">
+    <div carousel-item>
+        <div th:each="slideshow:${slideshowList}"><img th:src="${slideshow.imgUrl}" style="width: 100%;height: 100%">
+        </div>
+    </div>
+</div>
+<!--页面初始加载动画样式 begin-->
+<!--<div id="ajax-loader"
+     style="cursor: progress; position: fixed; top: -50%; left: -50%; width: 200%; height: 200%; background: #fff; z-index: 10000; overflow: hidden;">
+    <img src="/resource/img/ajax-loader.gif"
+         style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; margin: auto;"/>
+</div>-->
+<div class="layui-hide-xs">
+    <div class="fly-panel fly-column">
+        <div class="layui-container">
+            <i style="margin-left: 75%;">站内搜索:</i>
+            <i class="layui-icon search-btn"
+               style="margin-left: 5px;float: right;font-size: 20px">&#xe615</i>
+
+            <input class="layui-input" id="userNameParam" placeholder="请输入用户名"
+                   style="float: right;width: 200px;margin-top: 10px">
+        </div>
+    </div>
+</div>
+
+<div class="layui-container" style="margin-top: 20px">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md4">
+            <div class="fly-panel">
+                <h3 class="fly-panel-title">资源热议</h3>
+                <ul class="fly-panel-main fly-list-static">
+                    <li th:each="observer:${observerList}">
+                        <a target="_blank" th:href="${'/front/postInfoDetail.do?id='+observer.id}"
+                           th:text="${observer.name}">layui 的 GitHub 及 Gitee (码云)
+                            仓库，欢迎Star</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="fly-panel fly-rank fly-rank-reply" id="LAY_replyRank">
+                <h3 class="fly-panel-title">上传总榜</h3>
+                <dl>
+                    <!--<i class="layui-icon fly-loading">&#xe63d;</i>-->
+                    <dd th:each="postNum:${postNumList}">
+                        <a th:href="${'/front/other.do?userId='+postNum.id}">
+                            <img th:src="${postNum.imgUrl}"><cite th:text="${postNum.userName}">贤心</cite><i
+                                th:text="${postNum.postNum+'次'}"></i>
+                        </a>
+                    </dd>
+                </dl>
+            </div>
+            <div class="fly-panel fly-link">
+                <h3 class="fly-panel-title">友情链接</h3>
+                <dl class="fly-panel-main">
+                    <dd th:utext="${wbeParameter.link1}" style="color: #01AAED"><a href="http://www.layui.com/" target="_blank" >layui</a>
+                    <dd>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <dd th:utext="${wbeParameter.link2}" style="color: #01AAED"><a href="http://layim.layui.com/" target="_blank">WebIM</a>
+                    <dd>
+                    <dd th:utext="${wbeParameter.link3}" style="color: #01AAED"><a href="http://layer.layui.com/" target="_blank">layer</a>
+                    <dd>
+                    &nbsp;&nbsp;
+                    <dd th:utext="${wbeParameter.link4}" style="color: #01AAED"><a href="http://www.layui.com/laydate/" target="_blank">layDate</a>
+                    <dd>
+                </dl>
+            </div>
+
+        </div>
+        <div class="layui-col-md8">
+            <div class="fly-panel">
+                <div class="fly-panel-title fly-filter">
+                    <a>最新资讯</a>
+                </div>
+                <ul class="fly-list">
+                    <li th:each="news:${newsList}" style="padding-left: 14px;height:150px">
+                        <div class="layui-row">
+                            <div class="layui-col-md4">
+                                <img th:src="${news.img}" style="width: 200px;height: 150px">
+                            </div>
+                            <div class="layui-col-md8">
+                                <h2>
+                                    <a class="layui-badge" th:text="${news.categoryName}"></a>
+                                    <a th:text="${news.name}" th:href="${'/front/newDetail.do?id='+news.id}"></a>
+                                </h2>
+                                <div>
+                                    <p th:text="${news.digest}"></p>
+                                </div>
+                                <div class="fly-list-info">
+                                    <a link>
+                                        <cite th:text="${news.userName}">贤心</cite>
+                                    </a>
+                                    <span th:text="${#strings.substring(news.time,0,19)}"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+
+        </div>
+
+    </div>
+</div>
+<!--底部引用-->
+<div th:replace="front/public :: footer"></div>
+
+
+<script type="text/javascript" src="/resource/common/layui/layui.js"></script>
+<script type="text/javascript" src="/resource/js/front/index.js"></script>
+<script>
+    layui.use(['element', 'carousel'], function () {
+        var element = layui.element,
+            $ = layui.$,
+            carousel = layui.carousel;
+        carousel.render({
+            elem: '#test1'
+            , width: '100%' //设置容器宽度
+            , arrow: 'always' //始终显示箭头
+            //,anim: 'updown' //切换动画方式
+        });//导航的hover效果、二级菜单等功能，需要依赖element模块
+        $('.signin').on("click", function () {
+            $.ajax({
+                url: '/front/sign.do',
+                type: 'put',
+                dataType: 'json',
+                async: false,
+                success: function (result) {
+                    if (result.status) {
+                        layer.alert("签到成功!", {
+                            time: 1000,
+                            end: function () {
+                                location.reload()
+                            }
+                        })
+                    } else {
+                        layer.msg("失败!");
+                    }
+                }
+            });
+        })
+        $('.search-btn').on('click', function () {
+            var userName = $('#userNameParam').val();
+            location.href = '/front/addressBook.do?userName=' + userName
+        })
+    });
+</script>
+
+</body>
+</html>

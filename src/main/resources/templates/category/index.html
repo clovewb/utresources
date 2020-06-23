@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title></title>
+    <meta name="renderer" content="webkit"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="format-detection" content="telephone=no"/>
+    <link rel="stylesheet" href="/resource/common/layui/css/layui.css" media="all"/>
+    <link href="/resource/js/bstable/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link href="/resource/css/table.css" rel="stylesheet" type="text/css">
+    <link href="/resource/css/book02.css" rel="stylesheet" type="text/css">
+</head>
+<style>
+    .layui-form-item {
+        width: 350px;
+    }
+</style>
+<body>
+<div class="notice_main ">
+
+    <div class="notice_check  notice_check_last">
+        <div class="notice_nav r_right">
+            <a class="btn btn-default" onclick="addCategory()"><span class="glyphicon glyphicon-plus"></span>新增分类</a>
+        </div>
+        <div class="clear"></div>
+    </div>
+    <table id="categoryTables" lay-filter="categoryTables"></table>
+</div>
+<script type="text/html" id="operate">
+    <a class="toolbarMy" lay-event="del">删除</a>
+    <a class="toolbarMy" lay-event="addChd">添加子分类</a>
+    <a class="toolbarMy" lay-event="lookChd">查看子分类</a>
+</script>
+<div class="book_con" style="display: none;box-shadow: #FFFFFF">
+    <h1 class="book_h01">板块信息</h1>
+    <div class="layui-form">
+        <input hidden name="id" id="id">
+        <div class="top">
+            <div>
+                <div class="top_out">
+                    <table class="table" style="width: 100%">
+                        <tbody>
+                        <tr>
+                            <td>板块名称<span>*</span></td>
+                            <td colspan="8"><input type="text" class="layui-input" name="name" id="name"
+                                                   placeholder="请输入设施名称"
+                                                   minlength="2"
+                                                   lay-verify="required"></td>
+                        </tr>
+                        <tr>
+                            <td>简介图<span>*</span></td>
+                            <td><input type="text" id="imgSrc" id="imgSrc" readonly class="layui-input"
+                                       lay-verify="required">
+                                <input hidden name="img" id="img" id="img"></td>
+                        </tr>
+                        <tr>
+                            <td>简介<span>*</span></td>
+                            <td colspan="8" style="text-align: left">
+                                <textarea id="editor" class=" layui-textarea" name="content" ="content"
+                                style="height: 200px"></textarea>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class=" but_p">
+            <button class="but_save" type="submit" lay-submit="" lay-filter="Submit">确认修改</button>
+        </div>
+        <div style="clear: both;padding-bottom: 40px"></div>
+    </div>
+</div>
+<script type="text/javascript" src="/resource/common/layui/layui.js"></script>
+<script type="text/javascript" th:inline="javascript">
+    layui.use(['table', 'layer', 'upload', 'form', 'layedit'], function () {
+        var table = layui.table,
+            $ = layui.$,
+            layer = layui.layer,
+            layedit = layui.layedit,
+            upload = layui.upload,
+            form = layui.form;
+        var tableIns = table.render({
+            elem: '#categoryTables'
+            , url: '/category/categoryTable.do' //数据接口
+            , method: 'get'
+            , page: true //开启分页
+            , id: 'tableId'
+            , limits: [10, 15, 30]
+            , limit: 15
+            , cols: [
+                [ //表头
+                    {field: 'name', title: '分类名称'}
+                    , {field: 'chdName', title: '子分类'}
+                    , {title: '操作', toolbar: '#operate', 'fixed': 'right'}
+                ]
+            ]
+        });
+        //普通图片上传
+        upload.render({
+            elem: '#imgSrc'
+            , url: '/upload.do'
+            , done: function (res) {
+                //如果上传失败
+                if (res.code > 0) {
+                    return layer.msg('上传失败');
+                }
+                $("#img").val(res.obje);
+                $("#imgSrc").val(res.obje);
+                return layer.msg('上传成功');
+            }
+            , error: function () {
+                return layer.msg('上传失败');
+            }
+        });
+        addCategory = function () {
+            layer.open({
+                type: 2,
+                title: "新增分类",
+                shadeClose: false, //点击遮罩关闭层
+                area: ['700px', '278px'],
+                content: "/category/addCategory.do"
+            });
+        }
+        //监听行单击事件
+        table.on('row(categoryTables)', function (obj) {
+            console.log(obj.tr) //得到当前行元素对象
+            console.log(obj.data) //得到当前行数据
+            $('.book_con').show()
+            var plate = obj.data.plate;
+            $('#id').val(plate.id);
+            $('#name').val(plate.name);
+            $('#img').val(plate.img);
+            $('#imgSrc').val(plate.img);
+            layedit.setContent(index, plate.content)
+        });
+        form.on('submit(Submit)', function (data) {
+            data.field.content = layedit.getContent(index);
+            $.ajax({
+                url: '/category/plate.do',
+                type: 'put',
+                data: data.field,
+                dataType: 'json',
+                async: false,
+                success: function (result) {
+                    if (!result.status) {
+                        parent.layer.msg(result.msg, {time: 2000});
+                        return false;
+                    } else {
+                        layer.msg("修改成功!", {
+                            time: 900,
+                            end: function () {
+                                location.reload()
+                            }
+                        })
+                    }
+                }
+
+            });
+        });
+        layedit.set({
+            //暴露layupload参数设置接口 --详细查看layupload参数说明
+            uploadImage: {
+                url: '/layeditUpload.do',
+                accept: 'image',
+                acceptMime: 'image/*',
+                exts: 'jpg|png|gif|bmp|jpeg',
+                size: '10240'
+            }
+            , uploadVideo: {
+                url: '/layeditUpload.do',
+                accept: 'video',
+                acceptMime: 'video/*',
+                exts: 'mp4|flv|avi|rm|rmvb',
+                size: '20480'
+            }
+            //右键删除图片/视频时的回调参数，post到后台删除服务器文件等操作，
+            //传递参数：
+            //图片： imgpath --图片路径
+            //视频： filepath --视频路径 imgpath --封面路径
+            , calldel: {
+                url: '/Attachment/DeleteFile'
+            }
+            //开发者模式 --默认为false
+            , devmode: true
+            //插入代码设置
+            , codeConfig: {
+                hide: true,  //是否显示编码语言选择框
+                default: 'javascript' //hide为true时的默认语言格式
+            }
+            , tool: [
+                'code', 'strong', 'italic', 'underline', 'del', 'addhr', 'fontFomatt', 'face'
+                , 'left', 'center', 'right', 'link', 'unlink', 'images', 'image_alt', 'video', 'anchors'
+                , 'table', 'fullScreen']
+
+        });
+        var index = layedit.build('editor', {
+            height: 400 //设置编辑器高度
+        });
+        //监听工具条
+        table.on('tool(categoryTables)', function (obj) {
+            var data = obj.data;
+            console.log(data);
+            if (obj.event === 'del') {
+                //删除
+                delClassify(data.id);
+            } else if (obj.event === 'addChd') {
+                layer.open({
+                    type: 2,
+                    title: "新增子分类",
+                    shadeClose: false, //点击遮罩关闭层
+                    area: ['700px', '278px'],
+                    content: "/category/addChdCategory.do?ptId=" + data.id
+                });
+            } else if (obj.event === 'lookChd') {
+                layer.open({
+                    type: 2,
+                    title: "查看子分类",
+                    shadeClose: false, //点击遮罩关闭层
+                    area: ['700px', '400px'],
+                    content: "/category/lookChdCategory.do?ptId=" + data.id
+                });
+            }
+        });
+        active = {
+            reload: function () {
+                //执行重载
+                table
+                    .reload('tableId', {
+                        page: {
+                            curr: 1 //重新从第 1 页开始
+                        }
+                    });
+            }
+        };
+
+        //删除分类函数
+        function delClassify(id) {
+            layer.confirm('是否删除?', function (index) {
+                $.ajax({
+                    url: "/category/category.do",
+                    type: "post",
+                    data: {_method: "DELETE", "id": id},
+                    dataType: "json",
+                    success: function (result) {
+                        if (!result.status) {
+                            layer.msg(result.msg, {time: 2000});
+                            return false;
+                        }
+                        layer.msg("删除成功!", {time: 1000});
+                        active.reload();
+                    }
+                });
+                layer.close(index);
+            })
+        }
+
+        layedit.set({
+            //暴露layupload参数设置接口 --详细查看layupload参数说明
+            uploadImage: {
+                url: '/layeditUpload.do',
+                accept: 'image',
+                acceptMime: 'image/*',
+                exts: 'jpg|png|gif|bmp|jpeg',
+                size: '10240'
+            }
+            , uploadVideo: {
+                url: '/layeditUpload.do',
+                accept: 'video',
+                acceptMime: 'video/*',
+                exts: 'mp4|flv|avi|rm|rmvb',
+                size: '20480'
+            }
+            //右键删除图片/视频时的回调参数，post到后台删除服务器文件等操作，
+            //传递参数：
+            //图片： imgpath --图片路径
+            //视频： filepath --视频路径 imgpath --封面路径
+            , calldel: {
+                url: '/Attachment/DeleteFile'
+            }
+            //开发者模式 --默认为false
+            , devmode: true
+            //插入代码设置
+            , codeConfig: {
+                hide: true,  //是否显示编码语言选择框
+                default: 'javascript' //hide为true时的默认语言格式
+            }
+            , tool: [
+                'code', 'strong', 'italic', 'underline', 'del', 'addhr', 'fontFomatt', 'face'
+                , 'left', 'center', 'right', 'link', 'unlink', 'images', 'image_alt', 'video', 'anchors'
+                , 'table', 'fullScreen']
+
+        });
+        var index = layedit.build('editor', {
+            height: 300 //设置编辑器高度
+        });
+    });
+</script>
+
+</body>
+</html>

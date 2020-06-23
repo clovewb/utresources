@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>layui后台管理模板 2.0</title>
+    <meta name="renderer" content="webkit"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="format-detection" content="telephone=no"/>
+    <link rel="stylesheet" href="/resource/ztree/css/zTreeStyle/zTreeStyle.css" type="text/css">
+    <link href="/resource/css/table.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="/resource/common/layui/css/layui.css" media="all"/>
+    <link href="/resource/js/bstable/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link href="/resource/js/bstable/css/bootstrap-table.css" rel="stylesheet" type="text/css">
+</head>
+<body style="background-color: #ecf0f5;font-family: 微软雅黑;color: #475059;min-width: 1000px;overflow: auto">
+<script type="text/html" id="operate">
+    <a class="toolbarMy" lay-event="del">删除</a>
+</script>
+<div class="news_main layui-row" style="height: 700px">
+    <div class="layui-col-md2" style="background-color: white;height: 100%">
+        <h6>菜单目录</h6>
+        <div class="tree_left_top">
+            <div class=" order_ztree l_left organize_ztree" style="width: 100%">
+                <p>
+                <ul id="treeDemo" class="ztree"></ul>
+                <input hidden id="sysList">
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="layui-col-md10" style="background-color: white;margin-left: 10px;width: 82%;height: 100%">
+        <h6>资源管理</h6>
+        <div class="notice_check">
+            <div class="notice_nav r_right">
+                <a class="btn btn-default" onclick="addMenu()"><span class="glyphicon glyphicon-plus"></span>新增</a>
+            </div>
+            <div class="clear"></div>
+        </div>
+        <ul class="news_table department_table">
+            <li>
+                <table id="moduleTables" lay-filter="moduleTables" style="margin: 0 auto"></table>
+            </li>
+        </ul>
+    </div>
+    <div class="clear"></div>
+</div>
+<script type="text/javascript" src="/resource/common/layui/layui.js"></script>
+<script type="text/javascript" src="/resource/ztree/js/jquery-1.4.4.min.js"></script>
+<script src="/resource/js/config/jquery-1.7.2.min.js" type="text/javascript"></script>
+<script type="text/javascript" src="/resource/ztree/js/jquery.ztree.core.js"></script>
+<script type="text/javascript">
+    var reloadTable;
+    var addMenu;
+    layui.use(['table', 'layer', 'laydate', 'form',], function () {
+        var table = layui.table,
+            $ = layui.$,
+            layer = layui.layer,
+            form = layui.form;
+
+        var permissionId;
+        //菜单列表
+        var tableIns = table.render({
+            elem: '#moduleTables'
+            , url: '/menu/menu.do' //数据接口
+            , method: 'get'
+            , page: true //开启分页
+            , id: 'tableId'
+            , where: {
+                permissionId: permissionId
+            }
+            , limits: [10, 15, 30]
+            , limit: 15
+            , cols: [
+                [ //表头
+                    {'type': 'checkbox', 'fixed': 'left'}
+                    , {field: 'index', title: '序号'}
+                    , {field: 'permissionName', title: '资源名'}
+                    , {field: 'permissionMark', title: '权限标识'}
+                    , {field: 'permissionType', title: '资源类型'}
+                    , {field: 'url', title: 'url'}
+                    , {title: '操作', toolbar: '#operate', 'fixed': 'right'}
+                ]
+            ]
+        });
+        addMenu = function () {
+            console.log(permissionId)
+            if (permissionId == null) {
+                layer.alert("请选择父菜单后再进行操作！");
+                return false;
+            }
+            layer.open({
+                type: 2,
+                title: "添加资源",
+                shadeClose: false, //点击遮罩关闭层
+                area: ['550px', '450px'],
+                content: "/menu/addMenuHouser?parentId=" + permissionId
+            })
+        }
+        //监听用户列工具条
+        table.on('tool(moduleTables)', function (obj) {
+            var data = obj.data;
+            console.log(data);
+            if (obj.event == "del") {
+                layer.confirm('是否删除?', function (index) {
+                    $.ajax({
+                        url: "/menu/delMenu.do",
+                        type: "post",
+                        data: {"id": data.id},
+                        dataType: "json",
+                        success: function (result) {
+                            if (!result.status) {
+                                layer.msg(result.msg, {time: 2000});
+                                return false;
+                            }
+                            layer.msg("删除成功!", {time: 1000});
+                            active.reload();
+                        }
+                    });
+                    layer.close(index);
+                })
+            }
+        });
+
+        active = {
+            reload: function () {
+                //执行重载
+                table.reload('tableId', {
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                    , where: {
+                        permissionId: permissionId
+                    }
+                });
+            }
+        };
+        reloadTable = function (pId) {
+            permissionId = pId;
+            //执行重载
+            table.reload('tableId', {
+                page: {
+                    curr: 1 //重新从第 1 页开始
+                }
+                , where: {
+                    permissionId: pId
+                }
+            });
+        }
+    });
+
+</script>
+<script LANGUAGE="JavaScript" th:inline="javascript">
+    var zTreeObj;
+    // zTree 的参数配置，深入使用请参考 API 文档（setting 配置详解）
+    var setting = {
+        check: {enable: true},
+        data: {enable: true},
+        callback: {
+            onClick: chooseNode,
+        }
+    };
+    // zTree 的数据属性，深入使用请参考 API 文档（zTreeNode 节点数据详解）
+    console.log([[${sysList}]])
+    var zNodes = [[${sysList}]];
+
+    $(document).ready(function () {
+        zTreeObj = $.fn.zTree.init($("#treeDemo"), setting, zNodes);
+    });
+
+    function chooseNode(event, treeId, treeNode) {
+        console.log(treeNode)
+        reloadTable(treeNode.id);
+    }
+</script>
+
+</body>
+</html>
